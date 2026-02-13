@@ -1,0 +1,15 @@
+body { font-family: Arial, sans-serif; background:#f6f7fb; display:flex; justify-content:center; padding:40px; }
+.card { width: 420px; background:#fff; border-radius:14px; padding:22px; box-shadow:0 10px 25px rgba(0,0,0,.08); text-align:center; }
+.hearts { font-size:22px; margin-bottom:8px; }
+.subtitle { margin-top:-8px; color:#666; }
+.big-char { font-size:84px; margin:18px 0; }
+.choices { display:flex; flex-direction:column; gap:10px; margin:10px 0 14px; }
+button { border:0; padding:12px 14px; border-radius:10px; cursor:pointer; font-size:14px; }
+.primary { background:#2d6cdf; color:#fff; }
+.secondary { background:#eee; }
+.choice { background:#f0f1f4; }
+.hidden { display:none; }
+.result { font-weight:700; margin-top:6px; }
+.result.ok { color: #1a9b48; }
+.result.bad { color: #d93a2f; }
+.answer-line { color:#333; margin-top:6px; }
