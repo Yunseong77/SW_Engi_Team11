@@ -1,18 +1,57 @@
-// ✅ 너가 python에 적어둔 44개를 여기로 옮겨서 완성하면 됨
-// 형식: { char: "ก", name: "gor gai" }
 const consonants = [
   { char: "ก", name: "gor gai" },
   { char: "ข", name: "khor khai" },
+  { char: "ฃ", name: "khor khuat" },
   { char: "ค", name: "khor khwai" },
-  // ... 나머지 44개 채우기
+  { char: "ฅ", name: "khor khon" },
+  { char: "ฆ", name: "khor rakhang" },
+  { char: "ง", name: "ngor ngu" },
+  { char: "จ", name: "jor jan" },
+  { char: "ฉ", name: "chor ching" },
+  { char: "ช", name: "chor chang" },
+  { char: "ซ", name: "sor so" },
+  { char: "ฌ", name: "chor choe" },
+  { char: "ญ", name: "yor ying" },
+  { char: "ฎ", name: "dor chada" },
+  { char: "ฏ", name: "tor patak" },
+  { char: "ฐ", name: "thor than" },
+  { char: "ฑ", name: "thor montho" },
+  { char: "ฒ", name: "thor phuthao" },
+  { char: "ณ", name: "nor nen" },
+  { char: "ด", name: "dor dek" },
+  { char: "ต", name: "tor tao" },
+  { char: "ถ", name: "thor thung" },
+  { char: "ท", name: "thor thahan" },
+  { char: "ธ", name: "thor thong" },
+  { char: "น", name: "nor nu" },
+  { char: "บ", name: "bor baimai" },
+  { char: "ป", name: "por pla" },
+  { char: "ผ", name: "phor phueng" },
+  { char: "ฝ", name: "for fa" },
+  { char: "พ", name: "phor phan" },
+  { char: "ฟ", name: "for fan" },
+  { char: "ภ", name: "phor samphao" },
+  { char: "ม", name: "mor ma" },
+  { char: "ย", name: "yor yak" },
+  { char: "ร", name: "ror ruea" },
+  { char: "ล", name: "lor ling" },
+  { char: "ว", name: "wor waen" },
+  { char: "ศ", name: "sor sala" },
+  { char: "ษ", name: "sor ruesi" },
+  { char: "ส", name: "sor suea" },
+  { char: "ห", name: "hor hip" },
+  { char: "ฬ", name: "lor chula" },
+  { char: "อ", name: "or ang" },
+  { char: "ฮ", name: "hor nokhuk" }
 ];
 
 let hearts = 3;
 let current = null;
 let gameOver = false;
-
-// ✅ NEW: 맞춘(정답) 자음 저장
 let known = new Set();
+
+let playerName = "";
+let startCount = 0;
 
 const heartsEl = document.getElementById("hearts");
 const startBtn = document.getElementById("startBtn");
@@ -23,30 +62,46 @@ const bigChar = document.getElementById("bigChar");
 const choicesEl = document.getElementById("choices");
 const resultEl = document.getElementById("result");
 const answerLineEl = document.getElementById("answerLine");
-
-// ✅ NEW: remaining counter element (index.html에 id="remainingCounter" 하나 추가해야 함)
 const remainingCounterEl = document.getElementById("remainingCounter");
+
+const nicknameInput = document.getElementById("nicknameInput");
+const playerNicknameEl = document.getElementById("playerNickname");
+const playerStartsEl = document.getElementById("playerStarts");
 
 function setHearts() {
   heartsEl.textContent = "❤️".repeat(hearts);
 }
 
 function shuffle(arr) {
-  return arr.sort(() => Math.random() - 0.5);
+  return [...arr].sort(() => Math.random() - 0.5);
 }
 
-// ✅ NEW: 남은 자음 카운터 업데이트
 function updateRemainingCounter() {
-  if (!remainingCounterEl) return; // index.html에 없으면 그냥 무시
+  if (!remainingCounterEl) return;
   const remaining = consonants.length - known.size;
-  remainingCounterEl.textContent = `Remaining consonants: ${remaining}`;
+  remainingCounterEl.textContent = `Remaining: ${remaining}`;
 }
 
-// ✅ NEW: 아직 안 맞춘 자음 중에서만 문제 뽑기
+function updatePlayerInfo() {
+  if (playerNicknameEl) {
+    playerNicknameEl.textContent = playerName || "player";
+  }
+
+  if (playerStartsEl) {
+    playerStartsEl.textContent = ` — Starts: ${startCount}`;
+  }
+}
+
 function pickNextConsonant() {
-  const remainingList = consonants.filter(c => !known.has(c.char));
+  const remainingList = consonants.filter((c) => !known.has(c.char));
   if (remainingList.length === 0) return null;
   return remainingList[Math.floor(Math.random() * remainingList.length)];
+}
+
+function disableChoices() {
+  [...choicesEl.querySelectorAll("button")].forEach((b) => {
+    b.disabled = true;
+  });
 }
 
 function pickQuestion() {
@@ -54,10 +109,8 @@ function pickQuestion() {
   resultEl.className = "result";
   answerLineEl.textContent = "";
 
-  // ✅ NEW: 남은 것만 뽑기
   current = pickNextConsonant();
 
-  // ✅ NEW: 다 맞췄으면 종료
   if (!current) {
     gameOver = true;
     bigChar.textContent = "🎉";
@@ -72,21 +125,19 @@ function pickQuestion() {
 
   bigChar.textContent = current.char;
 
-  // ✅ NEW: 오답도 "아직 안 맞춘 것"에서만 뽑기 (더 깔끔)
   const wrongPool = consonants.filter(
-    c => c.char !== current.char && !known.has(c.char)
+    (c) => c.char !== current.char && !known.has(c.char)
   );
 
-  // 만약 남은 게 적어서 wrongPool이 부족하면, 전체에서라도 뽑기
-  const fallbackWrongPool = consonants.filter(c => c.char !== current.char);
-
+  const fallbackWrongPool = consonants.filter((c) => c.char !== current.char);
   const poolToUse = wrongPool.length >= 2 ? wrongPool : fallbackWrongPool;
 
-  const wrongs = shuffle([...poolToUse]).slice(0, 2);
+  const wrongs = shuffle(poolToUse).slice(0, 2);
   const options = shuffle([current, ...wrongs]);
 
   choicesEl.innerHTML = "";
-  options.forEach(opt => {
+
+  options.forEach((opt) => {
     const btn = document.createElement("button");
     btn.className = "choice";
     btn.textContent = opt.name;
@@ -96,12 +147,7 @@ function pickQuestion() {
     choicesEl.appendChild(btn);
   });
 
-  // ✅ NEW: 문제 보여줄 때마다 카운터 업데이트
   updateRemainingCounter();
-}
-
-function disableChoices() {
-  [...choicesEl.querySelectorAll("button")].forEach(b => (b.disabled = true));
 }
 
 function handleAnswer(selected) {
@@ -111,26 +157,25 @@ function handleAnswer(selected) {
 
   if (correct) {
     resultEl.textContent = "✓ Correct";
-    resultEl.classList.add("ok");
-    answerLineEl.textContent = `${current.char}  ${current.name}`;
+    resultEl.className = "result ok";
+    answerLineEl.textContent = `${current.char} — ${current.name}`;
 
-    // ✅ NEW: 맞춘 자음 기록 → 다시 안 나오게 됨
     known.add(current.char);
     updateRemainingCounter();
 
-    // 다음 문제로 넘어가고 싶으면 700ms 뒤 자동:
     setTimeout(() => {
-      if (!gameOver) pickQuestion();
+      if (!gameOver) {
+        pickQuestion();
+      }
     }, 700);
   } else {
     hearts -= 1;
     setHearts();
     resultEl.textContent = "✗ Incorrect";
-    resultEl.classList.add("bad");
+    resultEl.className = "result bad";
 
     if (hearts <= 0) {
       gameOver = true;
-      resultEl.textContent = "✗ Incorrect";
       answerLineEl.textContent = "Game Over";
       disableChoices();
       restartBtn.classList.remove("hidden");
@@ -139,10 +184,15 @@ function handleAnswer(selected) {
 }
 
 function startGame() {
+  playerName = nicknameInput && nicknameInput.value.trim()
+    ? nicknameInput.value.trim()
+    : "player";
+
+  startCount += 1;
+  updatePlayerInfo();
+
   hearts = 3;
   gameOver = false;
-
-  // ✅ NEW: 게임 시작할 때 known 초기화
   known = new Set();
 
   setHearts();
@@ -150,16 +200,13 @@ function startGame() {
   quizScreen.classList.remove("hidden");
   restartBtn.classList.add("hidden");
 
-  // ✅ NEW: 시작 시 카운터 갱신
   updateRemainingCounter();
-
   pickQuestion();
 }
 
 startBtn.addEventListener("click", startGame);
 restartBtn.addEventListener("click", startGame);
 
-// 초기 하트 표시
 setHearts();
-// ✅ NEW: 초기 카운터도 표시(요소가 있으면)
 updateRemainingCounter();
+updatePlayerInfo();
