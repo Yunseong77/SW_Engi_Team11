@@ -45,6 +45,8 @@ const consonants = [
   { char: "ฮ", name: "hor nokhuk" }
 ];
 
+const API_BASE_URL = "https://thai-quiz-backend-era2.onrender.com";
+
 let hearts = 3;
 let current = null;
 let gameOver = false;
@@ -183,12 +185,39 @@ function handleAnswer(selected) {
   }
 }
 
-function startGame() {
-  playerName = nicknameInput && nicknameInput.value.trim()
-    ? nicknameInput.value.trim()
-    : "player";
+async function startQuiz(nickname) {
+  const res = await fetch(`${API_BASE_URL}/api/quiz/start`, {
+    method: "POST",
+    headers: {
+      "Content-Type": "application/json"
+    },
+    body: JSON.stringify({
+      nickname: nickname
+    })
+  });
 
-  startCount += 1;
+  if (!res.ok) {
+    throw new Error("Failed to start quiz");
+  }
+
+  const data = await res.json();
+  return data;
+}
+
+async function startGame() {
+  playerName =
+    nicknameInput && nicknameInput.value.trim()
+      ? nicknameInput.value.trim()
+      : "player";
+
+  try {
+    const data = await startQuiz(playerName);
+    startCount = data.starts;
+  } catch (error) {
+    console.error("Backend error:", error);
+    startCount += 1;
+  }
+
   updatePlayerInfo();
 
   hearts = 3;
