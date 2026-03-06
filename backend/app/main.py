@@ -1,21 +1,34 @@
 from fastapi import FastAPI
 from pydantic import BaseModel
+from fastapi.middleware.cors import CORSMiddleware
 import os
 import psycopg2
 
 app = FastAPI()
 
+app.add_middleware(
+    CORSMiddleware,
+    allow_origins=["*"],
+    allow_credentials=True,
+    allow_methods=["*"],
+    allow_headers=["*"],
+)
+
 DATABASE_URL = os.getenv("DATABASE_URL")
+
 
 def get_conn():
     return psycopg2.connect(DATABASE_URL)
 
+
 class StartRequest(BaseModel):
     nickname: str
+
 
 @app.get("/health")
 def health():
     return {"status": "ok"}
+
 
 @app.post("/api/quiz/start")
 def start_quiz(data: StartRequest):
@@ -34,10 +47,16 @@ def start_quiz(data: StartRequest):
 
     if row:
         starts = row[0] + 1
-        cur.execute("UPDATE users SET starts=%s WHERE nickname=%s", (starts, data.nickname))
+        cur.execute(
+            "UPDATE users SET starts=%s WHERE nickname=%s",
+            (starts, data.nickname)
+        )
     else:
         starts = 1
-        cur.execute("INSERT INTO users (nickname, starts) VALUES (%s, %s)", (data.nickname, starts))
+        cur.execute(
+            "INSERT INTO users (nickname, starts) VALUES (%s, %s)",
+            (data.nickname, starts)
+        )
 
     conn.commit()
     cur.close()
@@ -45,12 +64,16 @@ def start_quiz(data: StartRequest):
 
     return {"nickname": data.nickname, "starts": starts}
 
+
 @app.get("/api/user/{nickname}")
 def get_user(nickname: str):
     conn = get_conn()
     cur = conn.cursor()
 
-    cur.execute("SELECT starts FROM users WHERE nickname=%s", (nickname,))
+    cur.execute(
+        "SELECT starts FROM users WHERE nickname=%s",
+        (nickname,)
+    )
     row = cur.fetchone()
 
     cur.close()
