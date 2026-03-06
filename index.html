@@ -9,15 +9,28 @@
 <body>
   <div class="card">
     <div id="hearts" class="hearts">❤️❤️❤️</div>
-<div id="remainingCounter"></div>
+    <div id="remainingCounter"></div>
+
     <h1 id="title">CSII Team Corgi presents</h1>
     <p class="subtitle">Thai Consonants</p>
 
     <div id="startScreen">
+      <input
+        type="text"
+        id="nicknameInput"
+        placeholder="Enter your nickname"
+        maxlength="20"
+        autocomplete="off"
+      />
       <button id="startBtn" class="primary">Start Quiz</button>
     </div>
 
     <div id="quizScreen" class="hidden">
+      <div id="playerInfo" class="player-info">
+        <span id="playerNickname"></span>
+        <span id="playerStarts"></span>
+      </div>
+
       <div id="bigChar" class="big-char">ก</div>
       <div id="choices" class="choices"></div>
 
